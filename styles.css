@@ -277,10 +277,13 @@ h1 span {
 .game-screen {
   position: relative;
   flex-direction: column;
-  padding-bottom: 170px;
+  padding-bottom: 100px;
+  isolation: isolate;
 }
 
 .game-header {
+  position: relative;
+  z-index: 4;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -343,6 +346,8 @@ h1 span {
 }
 
 .game-content {
+  position: relative;
+  z-index: 4;
   display: grid;
   flex: 1;
   grid-template-columns: minmax(240px, 0.75fr) minmax(560px, 2fr);
@@ -449,14 +454,6 @@ h1 span {
   font-weight: 900;
 }
 
-.answer-clue {
-  z-index: 1;
-  width: 82%;
-  font-size: clamp(0.72rem, 1.4vw, 0.94rem);
-  font-weight: 800;
-  line-height: 1.5;
-}
-
 .hold-ring {
   position: absolute;
   inset: 0;
@@ -519,23 +516,24 @@ h1 span {
 
 .camera-widget {
   position: fixed;
-  right: 24px;
+  left: 50%;
   bottom: 18px;
   z-index: 12;
-  width: min(300px, calc(100vw - 36px));
-  padding: 10px;
+  width: min(620px, calc(100vw - 36px));
+  padding: 8px 12px;
   border: 3px solid white;
-  border-radius: 22px;
+  border-radius: 999px;
   background: rgba(255, 250, 240, 0.94);
   box-shadow: var(--shadow);
+  transform: translateX(-50%);
 }
 
 .camera-heading {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 10px;
-  padding: 2px 4px 9px;
+  padding: 0;
   font-size: 0.82rem;
 }
 
@@ -565,11 +563,30 @@ h1 span {
 }
 
 .camera-stage {
-  position: relative;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
   overflow: hidden;
-  aspect-ratio: 16 / 9;
-  border-radius: 14px;
   background: #153c36;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+.camera-stage.on {
+  opacity: 1;
+  visibility: visible;
+}
+
+.camera-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(16, 75, 68, 0.16), rgba(16, 75, 68, 0.08)),
+    radial-gradient(circle at center, transparent 32%, rgba(8, 47, 42, 0.18) 100%);
 }
 
 .camera-stage video,
@@ -582,30 +599,17 @@ h1 span {
   transform: scaleX(-1);
 }
 
+.camera-stage video { z-index: 0; }
 .camera-stage canvas { z-index: 2; }
 
-.camera-placeholder {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  display: grid;
-  place-content: center;
-  color: #e8f5ef;
-  background: linear-gradient(145deg, #245f55, #143c35);
-  text-align: center;
-}
-
-.camera-placeholder span { font-size: 2rem; }
-.camera-placeholder p { margin: 4px 0 0; font-size: 0.78rem; line-height: 1.4; }
-.camera-widget.on .camera-placeholder { display: none; }
-
 .camera-status {
-  min-height: 23px;
-  padding: 7px 5px 0;
+  min-height: 0;
+  padding: 0 4px;
   color: #5d706c;
   font-size: 0.72rem;
   font-weight: 700;
   text-align: center;
+  white-space: nowrap;
 }
 
 .result-screen {
@@ -713,7 +717,7 @@ h1 span {
 @media (max-width: 680px) {
   .screen { padding: 14px; }
   .hero-card { padding: 28px 20px; border-radius: 30px; }
-  .game-screen { padding-bottom: 190px; }
+  .game-screen { padding-bottom: 90px; }
   .game-header { grid-template-columns: 1fr auto; }
   .brand-mini { display: none; }
   .status-group { justify-content: flex-start; }
@@ -728,16 +732,26 @@ h1 span {
   .answer-card::before { inset: 8px; border-width: 2px; }
   .answer-icon { font-size: 2.2rem; }
   .answer-name { font-size: 1rem; }
-  .answer-clue { display: none; }
-  .camera-widget { right: 12px; bottom: 10px; width: 220px; }
+  .camera-widget {
+    right: 12px;
+    bottom: 10px;
+    left: 12px;
+    width: auto;
+    transform: none;
+  }
+  .camera-heading { justify-content: space-between; }
+  .camera-status {
+    max-width: 44vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 @media (max-height: 690px) and (min-width: 800px) {
-  .game-screen { padding-top: 15px; padding-bottom: 140px; }
+  .game-screen { padding-top: 15px; padding-bottom: 90px; }
   .game-content { margin-top: 10px; }
   .question-letter { width: 160px; font-size: 7rem; }
   .answer-card { min-height: 220px; }
-  .camera-widget { width: 240px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -31,8 +31,10 @@ const elements = {
   wrongCount: document.querySelector("#wrong-count"),
   resultTitle: document.querySelector("#result-title"),
   resultMedal: document.querySelector("#result-medal"),
+  gameScreen: document.querySelector("#game-screen"),
   cameraToggle: document.querySelector("#camera-toggle"),
   cameraWidget: document.querySelector(".camera-widget"),
+  cameraStage: document.querySelector("#camera-stage"),
   cameraVideo: document.querySelector("#camera-video"),
   cameraCanvas: document.querySelector("#camera-canvas"),
   cameraStatus: document.querySelector("#camera-status"),
@@ -72,6 +74,7 @@ function beginGame() {
   elements.scoreValue.textContent = "0";
   setScreen("game");
   showQuestion();
+  void startCamera();
 }
 
 function showQuestion() {
@@ -162,6 +165,7 @@ function clearGestureSelection() {
 function showResult() {
   acceptingAnswer = false;
   clearGestureSelection();
+  stopCamera();
   elements.finalScore.textContent = String(score);
   elements.correctCount.textContent = String(correctAnswers);
   elements.wrongCount.textContent = String(wrongAnswers);
@@ -182,6 +186,7 @@ function showResult() {
 function goHome() {
   acceptingAnswer = false;
   clearGestureSelection();
+  stopCamera();
   setScreen("start");
 }
 
@@ -259,6 +264,8 @@ async function startCamera() {
     await elements.cameraVideo.play();
     resizeCameraCanvas();
     elements.cameraWidget.classList.add("on");
+    elements.cameraStage.classList.add("on");
+    elements.gameScreen.classList.add("camera-on");
     elements.cameraToggle.textContent = "ปิดกล้อง";
     elements.cameraStatus.textContent = "ยกฝ่ามือให้เห็นในกรอบ";
     lastVideoTime = -1;
@@ -268,6 +275,8 @@ async function startCamera() {
     elements.cameraStatus.textContent = cameraErrorMessage(error);
     elements.cameraToggle.textContent = "ลองเปิดอีกครั้ง";
     stopCameraTracks();
+    elements.cameraStage.classList.remove("on");
+    elements.gameScreen.classList.remove("camera-on");
   } finally {
     cameraStarting = false;
     elements.cameraToggle.disabled = false;
@@ -294,6 +303,8 @@ function stopCamera() {
   clearCameraCanvas();
   clearGestureSelection();
   elements.cameraWidget.classList.remove("on");
+  elements.cameraStage.classList.remove("on");
+  elements.gameScreen.classList.remove("camera-on");
   elements.cameraToggle.textContent = "เปิดกล้อง";
   elements.cameraStatus.textContent = "พร้อมเล่นด้วยการแตะ";
 }
