@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1f8a70" />
+    <meta
+      name="description"
+      content="เกมอักษร 3 หมู่ (ไตรยางศ์) สำหรับนักเรียนชั้นประถมศึกษาปีที่ 2 ตอบคำถามด้วยการยกมือ"
+    />
+    <title>ผจญภัยอักษร 3 หมู่</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <div class="decorative-cloud cloud-one" aria-hidden="true"></div>
+      <div class="decorative-cloud cloud-two" aria-hidden="true"></div>
+
+      <section id="start-screen" class="screen start-screen active" aria-labelledby="game-title">
+        <div class="hero-card glass-card">
+          <span class="eyebrow">สื่อการเรียนรู้ภาษาไทย · ป.2</span>
+          <div class="title-emblem" aria-hidden="true">ก ข ค</div>
+          <h1 id="game-title">ผจญภัย<br /><span>อักษร 3 หมู่</span></h1>
+          <p class="subtitle">ยกฝ่ามือ เลือกคำตอบ แล้วพิชิตไตรยางศ์!</p>
+
+          <div class="rules-grid" aria-label="กติกาการเล่น">
+            <div class="rule-chip correct"><strong>+1</strong><span>ตอบถูก</span></div>
+            <div class="rule-chip wrong"><strong>−1</strong><span>ตอบผิด</span></div>
+            <div class="rule-chip rounds"><strong>12</strong><span>ข้อต่อรอบ</span></div>
+          </div>
+
+          <button id="start-button" class="primary-button big-button" type="button">
+            <span aria-hidden="true">✋</span> เริ่มผจญภัย
+          </button>
+          <button id="how-button" class="text-button" type="button">ดูวิธีเล่น</button>
+        </div>
+
+        <div class="mascot-card" aria-hidden="true">
+          <div class="mascot-orbit orbit-one"></div>
+          <div class="mascot-orbit orbit-two"></div>
+          <div class="letter-sun">อ</div>
+          <div class="floating-letter letter-a">ข</div>
+          <div class="floating-letter letter-b">ฟ</div>
+          <div class="floating-letter letter-c">จ</div>
+        </div>
+      </section>
+
+      <section id="game-screen" class="screen game-screen" aria-label="หน้าคำถาม">
+        <header class="game-header">
+          <div class="brand-mini"><span>อักษร</span> 3 หมู่</div>
+          <div class="status-group">
+            <div class="status-pill score-pill" aria-live="polite">
+              <span aria-hidden="true">⭐</span>
+              <span>คะแนน</span>
+              <strong id="score-value">0</strong>
+            </div>
+            <div class="status-pill progress-pill">
+              <span aria-hidden="true">📚</span>
+              <span>ข้อ</span>
+              <strong><span id="question-number">1</span>/<span id="total-questions">12</span></strong>
+            </div>
+          </div>
+          <button id="home-button" class="icon-button" type="button" aria-label="กลับหน้าแรก">⌂</button>
+        </header>
+
+        <div class="game-content">
+          <section class="question-panel glass-card" aria-labelledby="question-heading">
+            <p id="question-heading">พยัญชนะตัวนี้อยู่ในหมู่ใด?</p>
+            <div id="question-letter" class="question-letter" aria-live="polite">ก</div>
+            <p class="gesture-hint"><span aria-hidden="true">✋</span> ยกฝ่ามือแล้วเลื่อนไปที่คำตอบ</p>
+          </section>
+
+          <section class="answer-area" aria-label="ตัวเลือกคำตอบ">
+            <button class="answer-card high-card" data-group="high" type="button">
+              <span class="answer-icon" aria-hidden="true">☁️</span>
+              <span class="answer-name">อักษรสูง</span>
+              <span class="answer-clue">ข ฉ ถ ผ ฝ ศ ษ ส ห</span>
+              <span class="hold-ring" aria-hidden="true"></span>
+            </button>
+            <button class="answer-card middle-card" data-group="middle" type="button">
+              <span class="answer-icon" aria-hidden="true">👑</span>
+              <span class="answer-name">อักษรกลาง</span>
+              <span class="answer-clue">ก จ ฎ ฏ ด ต บ ป อ</span>
+              <span class="hold-ring" aria-hidden="true"></span>
+            </button>
+            <button class="answer-card low-card" data-group="low" type="button">
+              <span class="answer-icon" aria-hidden="true">🌿</span>
+              <span class="answer-name">อักษรต่ำ</span>
+              <span class="answer-clue">ค ง ช ซ ท น พ ฟ ม ย ร ล ว ฮ</span>
+              <span class="hold-ring" aria-hidden="true"></span>
+            </button>
+          </section>
+
+          <div id="feedback" class="feedback" role="status" aria-live="assertive"></div>
+        </div>
+
+        <aside class="camera-widget" aria-label="ระบบตรวจจับมือ">
+          <div class="camera-heading">
+            <div>
+              <span class="camera-dot" aria-hidden="true"></span>
+              <strong>กล้องยกมือ</strong>
+            </div>
+            <button id="camera-toggle" class="camera-button" type="button">เปิดกล้อง</button>
+          </div>
+          <div id="camera-stage" class="camera-stage">
+            <video id="camera-video" autoplay playsinline muted></video>
+            <canvas id="camera-canvas" aria-hidden="true"></canvas>
+            <div id="camera-placeholder" class="camera-placeholder">
+              <span aria-hidden="true">📷</span>
+              <p>กดเปิดกล้อง<br />หรือแตะคำตอบได้เลย</p>
+            </div>
+          </div>
+          <div id="camera-status" class="camera-status">พร้อมเล่นด้วยการแตะ</div>
+        </aside>
+      </section>
+
+      <section id="result-screen" class="screen result-screen" aria-labelledby="result-title">
+        <div class="result-card glass-card">
+          <div id="result-medal" class="result-medal" aria-hidden="true">🏆</div>
+          <span class="eyebrow">จบการผจญภัยแล้ว</span>
+          <h2 id="result-title">เก่งมาก!</h2>
+          <p>คะแนนของหนูคือ</p>
+          <div id="final-score" class="final-score">0</div>
+          <div class="summary-row">
+            <div><strong id="correct-count">0</strong><span>ตอบถูก</span></div>
+            <div><strong id="wrong-count">0</strong><span>ตอบผิด</span></div>
+          </div>
+          <button id="replay-button" class="primary-button big-button" type="button">เล่นอีกครั้ง</button>
+          <button id="result-home-button" class="text-button" type="button">กลับหน้าแรก</button>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="how-dialog" class="how-dialog">
+      <button id="close-how" class="dialog-close" type="button" aria-label="ปิด">×</button>
+      <span class="eyebrow">วิธีเล่นง่าย ๆ</span>
+      <h2>ยกมือเลือกคำตอบ</h2>
+      <ol>
+        <li><span>1</span><p>กด <strong>เปิดกล้อง</strong> และอนุญาตให้ใช้กล้อง</p></li>
+        <li><span>2</span><p>หันฝ่ามือเข้าหากล้อง แล้วเลื่อนไปทางซ้าย กลาง หรือขวา</p></li>
+        <li><span>3</span><p>ค้างไว้ที่คำตอบประมาณ 1 วินาที ระบบจะตอบให้อัตโนมัติ</p></li>
+      </ol>
+      <p class="dialog-note">หากไม่ใช้กล้อง สามารถแตะหรือคลิกการ์ดคำตอบได้</p>
+      <button id="dialog-play" class="primary-button" type="button">เข้าใจแล้ว</button>
+    </dialog>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
