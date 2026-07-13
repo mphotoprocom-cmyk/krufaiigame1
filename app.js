@@ -1,9 +1,45 @@
-import { GROUPS, QUESTION_COUNT, allLetters, scoreDelta, shuffled } from "./game-core.js";
+import {
+  DEFAULT_QUESTION_COUNT,
+  GROUPS,
+  QUESTION_COUNT_OPTIONS,
+  allLetters,
+  groupForLetter,
+  scoreDelta,
+  shuffled,
+} from "./game-core.js";
+import { VOCAB_WORDS } from "./vocab-data.js";
 
 const HOLD_DURATION = 1000;
 const MEDIAPIPE_VERSION = "0.10.35";
 const MODEL_URL =
   "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
+const TEACHER_STATES = {
+  normal: {
+    image: "assets/teacher-normal.png",
+    message: "พร้อมเรียนแล้ว ยกมือเลือกคำตอบได้เลย",
+  },
+  happy: {
+    image: "assets/teacher-happy.png",
+    message: "เก่งมากเลย! ตอบถูกแล้ว ไปข้อต่อไปกัน",
+  },
+  encourage: {
+    image: "assets/teacher-encourage.png",
+    message: "ไม่เป็นไรนะ ลองตั้งใจดูใหม่ คุณครูเป็นกำลังใจให้",
+  },
+};
+const TEACHER_NAME = "ครูสุพรรษา";
+const GAME_MODES = {
+  letters: {
+    title: "ตัวอักษร",
+    heading: "พยัญชนะตัวนี้อยู่ในหมู่ใด?",
+    teacher: "มาอ่านตัวอักษรแล้วเลือกหมู่ให้ถูกกันนะ",
+  },
+  vocab: {
+    title: "คำศัพท์",
+    heading: "คำศัพท์นี้ขึ้นต้นด้วยอักษรหมู่ใด?",
+    teacher: "ดูภาพและคำศัพท์ แล้วคิดว่าอักษรตัวแรกอยู่หมู่ไหน",
+  },
+};
 
 const screens = {
   start: document.querySelector("#start-screen"),
@@ -13,6 +49,9 @@ const screens = {
 
 const elements = {
   startButton: document.querySelector("#start-button"),
+  selectedQuestionCount: document.querySelector("#selected-question-count"),
+  modeOptions: [...document.querySelectorAll(".mode-option")],
+  countOptions: [...document.querySelectorAll(".count-option")],
   howButton: document.querySelector("#how-button"),
   howDialog: document.querySelector("#how-dialog"),
   closeHow: document.querySelector("#close-how"),
@@ -20,7 +59,15 @@ const elements = {
   homeButton: document.querySelector("#home-button"),
   resultHomeButton: document.querySelector("#result-home-button"),
   replayButton: document.querySelector("#replay-button"),
+  questionPanel: document.querySelector("#question-panel"),
+  questionHeading: document.querySelector("#question-heading"),
   questionLetter: document.querySelector("#question-letter"),
+  questionVocab: document.querySelector("#question-vocab"),
+  questionImage: document.querySelector("#question-image"),
+  questionWord: document.querySelector("#question-word"),
+  startTeacherImage: document.querySelector("#start-teacher-image"),
+  gameTeacherImage: document.querySelector("#game-teacher-image"),
+  teacherMessage: document.querySelector("#teacher-message"),
   scoreValue: document.querySelector("#score-value"),
   questionNumber: document.querySelector("#question-number"),
   totalQuestions: document.querySelector("#total-questions"),
@@ -31,6 +78,8 @@ const elements = {
   wrongCount: document.querySelector("#wrong-count"),
   resultTitle: document.querySelector("#result-title"),
   resultMedal: document.querySelector("#result-medal"),
+  resultTeacherImage: document.querySelector("#result-teacher-image"),
+  resultTeacherMessage: document.querySelector("#result-teacher-message"),
   gameScreen: document.querySelector("#game-screen"),
   cameraToggle: document.querySelector("#camera-toggle"),
   cameraWidget: document.querySelector(".camera-widget"),
@@ -46,6 +95,8 @@ let score = 0;
 let correctAnswers = 0;
 let wrongAnswers = 0;
 let acceptingAnswer = false;
+let selectedQuestionCount = DEFAULT_QUESTION_COUNT;
+let currentMode = "letters";
 
 let cameraStream = null;
 let handLandmarker = null;
@@ -57,7 +108,7 @@ let gestureNeedsReset = false;
 let noHandSince = 0;
 let lastVideoTime = -1;
 
-elements.totalQuestions.textContent = String(QUESTION_COUNT);
+syncQuestionCountUi();
 
 function setScreen(name) {
   Object.entries(screens).forEach(([key, screen]) => {
@@ -66,12 +117,14 @@ function setScreen(name) {
 }
 
 function beginGame() {
-  questions = shuffled(allLetters()).slice(0, QUESTION_COUNT);
+  const source = currentMode === "letters" ? allLetters() : VOCAB_WORDS;
+  questions = shuffled(source).slice(0, selectedQuestionCount);
   questionIndex = 0;
   score = 0;
   correctAnswers = 0;
   wrongAnswers = 0;
   elements.scoreValue.textContent = "0";
+  setTeacherState("normal");
   setScreen("game");
   showQuestion();
   void startCamera();
@@ -86,9 +139,7 @@ function showQuestion() {
 
   const question = questions[questionIndex];
   elements.questionNumber.textContent = String(questionIndex + 1);
-  elements.questionLetter.textContent = question.letter;
-  elements.questionLetter.classList.remove("pop");
-  requestAnimationFrame(() => elements.questionLetter.classList.add("pop"));
+  renderQuestion(question);
   elements.cameraStatus.textContent = cameraStream
     ? "ลดมือลง แล้วเตรียมยกมือเลือกคำตอบ"
     : "พร้อมเล่นด้วยการแตะ หรือเปิดกล้องเพื่อยกมือ";
@@ -101,14 +152,16 @@ function chooseAnswer(group, source = "click") {
   clearGestureSelection();
 
   const current = questions[questionIndex];
+  const answerGroup = current.group ?? groupForLetter(current.letter ?? current.initial);
   const selectedCard = elements.answerCards.find((card) => card.dataset.group === group);
-  const correctCard = elements.answerCards.find((card) => card.dataset.group === current.group);
-  const isCorrect = group === current.group;
+  const correctCard = elements.answerCards.find((card) => card.dataset.group === answerGroup);
+  const isCorrect = group === answerGroup;
 
   if (isCorrect) {
     score += scoreDelta(true);
     correctAnswers += 1;
     selectedCard.classList.add("correct-answer");
+    setTeacherState("happy");
     showFeedback("ถูกต้อง! +1 ⭐", "good");
     playTone(660, 0.12, "sine");
     setTimeout(() => playTone(880, 0.16, "sine"), 110);
@@ -117,7 +170,8 @@ function chooseAnswer(group, source = "click") {
     wrongAnswers += 1;
     selectedCard.classList.add("wrong-answer");
     correctCard.classList.add("correct-answer");
-    showFeedback(`ยังไม่ถูก −1 · คำตอบคือ ${GROUPS[current.group].label}`, "bad");
+    setTeacherState("encourage");
+    showFeedback(`ยังไม่ถูก −1 · คำตอบคือ ${GROUPS[answerGroup].label}`, "bad");
     playTone(210, 0.22, "triangle");
   }
 
@@ -162,6 +216,50 @@ function clearGestureSelection() {
   });
 }
 
+function syncQuestionCountUi() {
+  elements.selectedQuestionCount.textContent = String(selectedQuestionCount);
+  elements.totalQuestions.textContent = String(selectedQuestionCount);
+
+  elements.countOptions.forEach((button) => {
+    const isActive = Number(button.dataset.count) === selectedQuestionCount;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
+function syncModeUi() {
+  elements.modeOptions.forEach((button) => {
+    const isActive = button.dataset.mode === currentMode;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
+function setQuestionCount(count) {
+  if (!QUESTION_COUNT_OPTIONS.includes(count)) return;
+  selectedQuestionCount = count;
+  syncQuestionCountUi();
+}
+
+function setGameMode(mode) {
+  if (!(mode in GAME_MODES)) return;
+  currentMode = mode;
+  syncModeUi();
+}
+
+function setTeacherState(state) {
+  const teacher = TEACHER_STATES[state] ?? TEACHER_STATES.normal;
+  if (elements.startTeacherImage) elements.startTeacherImage.src = teacher.image;
+  if (elements.gameTeacherImage) elements.gameTeacherImage.src = teacher.image;
+  if (elements.teacherMessage) elements.teacherMessage.textContent = teacher.message;
+}
+
+function setResultTeacherState(state, message) {
+  const teacher = TEACHER_STATES[state] ?? TEACHER_STATES.normal;
+  elements.resultTeacherImage.src = teacher.image;
+  elements.resultTeacherMessage.textContent = message;
+}
+
 function showResult() {
   acceptingAnswer = false;
   clearGestureSelection();
@@ -173,20 +271,86 @@ function showResult() {
   if (score >= 9) {
     elements.resultTitle.textContent = "ยอดเยี่ยมมาก!";
     elements.resultMedal.textContent = "🏆";
+    setResultTeacherState("happy", `${TEACHER_NAME}ภูมิใจมาก หนูทำได้ยอดเยี่ยมเลย`);
   } else if (score >= 5) {
     elements.resultTitle.textContent = "เก่งมาก!";
     elements.resultMedal.textContent = "🥇";
+    setResultTeacherState("normal", `${TEACHER_NAME}ดีใจมาก ฝึกอีกนิดก็ยิ่งเก่งขึ้นแน่นอน`);
   } else {
     elements.resultTitle.textContent = "ลองอีกครั้งนะ!";
     elements.resultMedal.textContent = "🌟";
+    setResultTeacherState("encourage", `${TEACHER_NAME}ขอเป็นกำลังใจให้ ลองใหม่อีกครั้งนะคนเก่ง`);
   }
   setScreen("result");
+}
+
+function renderQuestion(question) {
+  elements.questionHeading.textContent = GAME_MODES[currentMode].heading;
+  elements.questionPanel.classList.toggle("mode-letters", currentMode === "letters");
+  elements.questionPanel.classList.toggle("mode-vocab", currentMode === "vocab");
+
+  if (currentMode === "letters") {
+    elements.questionLetter.hidden = false;
+    elements.questionVocab.hidden = true;
+    elements.questionLetter.classList.remove("is-hidden");
+    elements.questionVocab.classList.add("is-hidden");
+    elements.questionLetter.textContent = question.letter;
+    elements.questionLetter.classList.remove("pop");
+    requestAnimationFrame(() => elements.questionLetter.classList.add("pop"));
+    return;
+  }
+
+  elements.questionLetter.hidden = true;
+  elements.questionVocab.hidden = false;
+  elements.questionLetter.classList.add("is-hidden");
+  elements.questionVocab.classList.remove("is-hidden");
+  elements.questionWord.textContent = question.word;
+  elements.questionImage.src = vocabIllustrationDataUrl(question);
+  elements.questionImage.alt = `ภาพประกอบคำว่า ${question.word}`;
+}
+
+function vocabIllustrationDataUrl(question) {
+  const accent = {
+    high: ["#8ad0ff", "#dff3ff"],
+    middle: ["#ffd97d", "#fff3c8"],
+    low: ["#9de39b", "#e6f9de"],
+  }[question.group] ?? ["#d9e6f2", "#f7fbff"];
+  const safeWord = escapeXml(question.word);
+  const safeEmoji = escapeXml(question.emoji);
+  const safeInitial = escapeXml(question.initial);
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="${accent[1]}"/>
+          <stop offset="100%" stop-color="${accent[0]}"/>
+        </linearGradient>
+      </defs>
+      <rect x="10" y="10" width="220" height="220" rx="40" fill="url(#bg)"/>
+      <circle cx="120" cy="96" r="58" fill="rgba(255,255,255,0.82)"/>
+      <text x="120" y="116" text-anchor="middle" font-size="66">${safeEmoji}</text>
+      <rect x="44" y="164" width="152" height="42" rx="21" fill="rgba(255,255,255,0.92)"/>
+      <text x="120" y="192" text-anchor="middle" font-size="24" font-weight="700" fill="#6d4412">${safeWord}</text>
+      <text x="36" y="40" font-size="22" font-weight="700" fill="rgba(23,63,58,0.7)">${safeInitial}</text>
+    </svg>
+  `;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+function escapeXml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
 }
 
 function goHome() {
   acceptingAnswer = false;
   clearGestureSelection();
   stopCamera();
+  setTeacherState("normal");
   setScreen("start");
 }
 
@@ -267,7 +431,7 @@ async function startCamera() {
     elements.cameraStage.classList.add("on");
     elements.gameScreen.classList.add("camera-on");
     elements.cameraToggle.textContent = "ปิดกล้อง";
-    elements.cameraStatus.textContent = "ยกฝ่ามือให้เห็นในกรอบ";
+    elements.cameraStatus.textContent = "ยกฝ่ามือให้กล้องเห็น";
     lastVideoTime = -1;
     cameraLoopId = requestAnimationFrame(processCameraFrame);
   } catch (error) {
@@ -336,19 +500,22 @@ function processCameraFrame(now) {
       elements.cameraStatus.textContent = "ระบบตรวจจับมือสะดุด กรุณาปิดและเปิดกล้องใหม่";
     }
   }
+
   cameraLoopId = requestAnimationFrame(processCameraFrame);
 }
 
 function processHandResult(result, now) {
   const landmarks = result.landmarks?.[0];
   clearCameraCanvas();
+  if (landmarks) {
+    drawHandCursor(landmarks);
+  }
 
   if (!landmarks) {
-    handleNoOpenPalm(now, "ยกฝ่ามือให้เห็นในกรอบ");
+    handleNoOpenPalm(now, "ยกฝ่ามือให้กล้องเห็น");
     return;
   }
 
-  drawHandCursor(landmarks);
   if (!isOpenPalm(landmarks)) {
     handleNoOpenPalm(now, "กางนิ้วมือให้เห็นชัด ๆ");
     return;
@@ -427,17 +594,6 @@ function drawHandCursor(landmarks) {
   context.lineWidth = Math.max(3, canvas.width * 0.006);
   context.strokeStyle = "white";
   context.stroke();
-
-  context.setLineDash([8, 8]);
-  context.lineWidth = 2;
-  context.strokeStyle = "rgba(255,255,255,0.5)";
-  [1 / 3, 2 / 3].forEach((ratio) => {
-    context.beginPath();
-    context.moveTo(canvas.width * ratio, 0);
-    context.lineTo(canvas.width * ratio, canvas.height);
-    context.stroke();
-  });
-  context.setLineDash([]);
 }
 
 function distance(a, b) {
@@ -450,6 +606,12 @@ function average(values) {
 
 elements.answerCards.forEach((card) => {
   card.addEventListener("click", () => chooseAnswer(card.dataset.group));
+});
+elements.modeOptions.forEach((button) => {
+  button.addEventListener("click", () => setGameMode(button.dataset.mode));
+});
+elements.countOptions.forEach((button) => {
+  button.addEventListener("click", () => setQuestionCount(Number(button.dataset.count)));
 });
 elements.startButton.addEventListener("click", beginGame);
 elements.replayButton.addEventListener("click", beginGame);
@@ -466,3 +628,5 @@ window.addEventListener("resize", () => {
   if (cameraStream) resizeCameraCanvas();
 });
 window.addEventListener("beforeunload", stopCameraTracks);
+
+syncModeUi();

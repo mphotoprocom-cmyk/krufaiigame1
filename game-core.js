@@ -16,12 +16,21 @@ export const GROUPS = {
   },
 };
 
-export const QUESTION_COUNT = 12;
+export const DEFAULT_QUESTION_COUNT = 12;
+export const QUESTION_COUNT_OPTIONS = [5, 10, 12, 15];
 
 export function allLetters() {
   return Object.entries(GROUPS).flatMap(([group, data]) =>
     data.letters.map((letter) => ({ letter, group })),
   );
+}
+
+export function groupForLetter(letter) {
+  return Object.entries(GROUPS).find(([, data]) => data.letters.includes(letter))?.[0] ?? null;
+}
+
+export function initialConsonant(word) {
+  return [...word].find((character) => groupForLetter(character)) ?? null;
 }
 
 export function shuffled(items, random = Math.random) {

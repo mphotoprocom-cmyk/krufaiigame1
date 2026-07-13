@@ -23,10 +23,28 @@
           <h1 id="game-title">ผจญภัย<br /><span>อักษร 3 หมู่</span></h1>
           <p class="subtitle">ยกฝ่ามือ เลือกคำตอบ แล้วพิชิตไตรยางศ์!</p>
 
+          <div class="mode-picker" aria-label="เลือกโหมดเกม">
+            <p class="picker-label">เลือกโหมดก่อนเล่น</p>
+            <div class="picker-options" role="group" aria-label="ตัวเลือกโหมด">
+              <button class="mode-option active" data-mode="letters" type="button">ตัวอักษร</button>
+              <button class="mode-option" data-mode="vocab" type="button">คำศัพท์</button>
+            </div>
+          </div>
+
           <div class="rules-grid" aria-label="กติกาการเล่น">
             <div class="rule-chip correct"><strong>+1</strong><span>ตอบถูก</span></div>
             <div class="rule-chip wrong"><strong>−1</strong><span>ตอบผิด</span></div>
-            <div class="rule-chip rounds"><strong>12</strong><span>ข้อต่อรอบ</span></div>
+            <div class="rule-chip rounds"><strong id="selected-question-count">12</strong><span>ข้อต่อรอบ</span></div>
+          </div>
+
+          <div class="question-count-picker" aria-label="เลือกจำนวนข้อ">
+            <p class="picker-label">เลือกจำนวนข้อก่อนเล่น</p>
+            <div class="picker-options" role="group" aria-label="ตัวเลือกจำนวนข้อ">
+              <button class="count-option" data-count="5" type="button">5 ข้อ</button>
+              <button class="count-option" data-count="10" type="button">10 ข้อ</button>
+              <button class="count-option active" data-count="12" type="button">12 ข้อ</button>
+              <button class="count-option" data-count="15" type="button">15 ข้อ</button>
+            </div>
           </div>
 
           <button id="start-button" class="primary-button big-button" type="button">
@@ -35,13 +53,20 @@
           <button id="how-button" class="text-button" type="button">ดูวิธีเล่น</button>
         </div>
 
-        <div class="mascot-card" aria-hidden="true">
-          <div class="mascot-orbit orbit-one"></div>
-          <div class="mascot-orbit orbit-two"></div>
-          <div class="letter-sun">อ</div>
-          <div class="floating-letter letter-a">ข</div>
-          <div class="floating-letter letter-b">ฟ</div>
-          <div class="floating-letter letter-c">จ</div>
+        <div class="teacher-hero" aria-label="ครูสุพรรษาต้อนรับ">
+          <div class="teacher-hero-bubble">
+            <strong>ครูสุพรรษา</strong>
+            <p>มาช่วยลุ้นคำตอบกับหนูตลอดเกมเลยนะ</p>
+          </div>
+          <img
+            id="start-teacher-image"
+            class="start-teacher-image"
+            src="assets/teacher-normal.png"
+            alt="ภาพการ์ตูนครูสุพรรษา"
+          />
+          <div class="floating-letter letter-a" aria-hidden="true">ข</div>
+          <div class="floating-letter letter-b" aria-hidden="true">ฟ</div>
+          <div class="floating-letter letter-c" aria-hidden="true">จ</div>
         </div>
       </section>
 
@@ -68,12 +93,31 @@
           <canvas id="camera-canvas" aria-hidden="true"></canvas>
         </div>
 
+        <aside class="teacher-guide game-teacher-guide" aria-label="ครูสุพรรษาแนะนำ">
+          <div class="teacher-bubble">
+            <strong id="teacher-title">ครูสุพรรษา</strong>
+            <p id="teacher-message">พร้อมเรียนแล้ว ยกมือเลือกคำตอบได้เลย</p>
+          </div>
+          <img
+            id="game-teacher-image"
+            class="game-teacher-image"
+            src="assets/teacher-normal.png"
+            alt="ภาพการ์ตูนครูสุพรรษา"
+          />
+        </aside>
+
         <div class="game-content">
-          <section class="question-panel glass-card" aria-labelledby="question-heading">
-            <p id="question-heading">พยัญชนะตัวนี้อยู่ในหมู่ใด?</p>
-            <div id="question-letter" class="question-letter" aria-live="polite">ก</div>
-            <p class="gesture-hint"><span aria-hidden="true">✋</span> ยกฝ่ามือแล้วเลื่อนไปที่คำตอบ</p>
-          </section>
+          <div class="top-stage">
+            <section id="question-panel" class="question-panel glass-card" aria-labelledby="question-heading">
+              <p id="question-heading">พยัญชนะตัวนี้อยู่ในหมู่ใด?</p>
+              <div id="question-letter" class="question-letter" aria-live="polite">ก</div>
+              <div id="question-vocab" class="question-vocab" hidden>
+                <img id="question-image" class="question-image" alt="ภาพประกอบคำศัพท์" />
+                <div id="question-word" class="question-word" aria-live="polite">ไข่</div>
+              </div>
+              <p class="gesture-hint"><span aria-hidden="true">✋</span> ยกฝ่ามือแล้วเลื่อนไปที่คำตอบ</p>
+            </section>
+          </div>
 
           <section class="answer-area" aria-label="ตัวเลือกคำตอบ">
             <button class="answer-card high-card" data-group="high" type="button">
@@ -110,9 +154,16 @@
 
       <section id="result-screen" class="screen result-screen" aria-labelledby="result-title">
         <div class="result-card glass-card">
+          <img
+            id="result-teacher-image"
+            class="result-teacher-image"
+            src="assets/teacher-happy.png"
+            alt="ภาพการ์ตูนครูสุพรรษา"
+          />
           <div id="result-medal" class="result-medal" aria-hidden="true">🏆</div>
           <span class="eyebrow">จบการผจญภัยแล้ว</span>
           <h2 id="result-title">เก่งมาก!</h2>
+          <p id="result-teacher-message" class="result-teacher-message">ครูสุพรรษาภูมิใจในตัวหนูมาก</p>
           <p>คะแนนของหนูคือ</p>
           <div id="final-score" class="final-score">0</div>
           <div class="summary-row">
