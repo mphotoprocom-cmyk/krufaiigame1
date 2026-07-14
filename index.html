@@ -84,6 +84,11 @@
               <span>ข้อ</span>
               <strong><span id="question-number">1</span>/<span id="total-questions">12</span></strong>
             </div>
+            <div class="status-pill time-pill" aria-live="polite">
+              <span aria-hidden="true">⏱️</span>
+              <span>เวลา</span>
+              <strong id="timer-value">00:00</strong>
+            </div>
           </div>
           <button id="home-button" class="icon-button" type="button" aria-label="กลับหน้าแรก">⌂</button>
         </header>
@@ -169,9 +174,12 @@
           <div class="summary-row">
             <div><strong id="correct-count">0</strong><span>ตอบถูก</span></div>
             <div><strong id="wrong-count">0</strong><span>ตอบผิด</span></div>
+            <div><strong id="final-time">00:00</strong><span>เวลาที่ใช้</span></div>
           </div>
-          <button id="replay-button" class="primary-button big-button" type="button">เล่นอีกครั้ง</button>
-          <button id="result-home-button" class="text-button" type="button">กลับหน้าแรก</button>
+          <div class="result-actions">
+            <button id="replay-button" class="primary-button big-button" type="button">เล่นอีกครั้ง</button>
+            <button id="result-home-button" class="secondary-button" type="button">หน้าแรก</button>
+          </div>
         </div>
       </section>
     </main>

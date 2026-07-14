@@ -71,11 +71,13 @@ const elements = {
   scoreValue: document.querySelector("#score-value"),
   questionNumber: document.querySelector("#question-number"),
   totalQuestions: document.querySelector("#total-questions"),
+  timerValue: document.querySelector("#timer-value"),
   answerCards: [...document.querySelectorAll(".answer-card")],
   feedback: document.querySelector("#feedback"),
   finalScore: document.querySelector("#final-score"),
   correctCount: document.querySelector("#correct-count"),
   wrongCount: document.querySelector("#wrong-count"),
+  finalTime: document.querySelector("#final-time"),
   resultTitle: document.querySelector("#result-title"),
   resultMedal: document.querySelector("#result-medal"),
   resultTeacherImage: document.querySelector("#result-teacher-image"),
@@ -97,6 +99,9 @@ let wrongAnswers = 0;
 let acceptingAnswer = false;
 let selectedQuestionCount = DEFAULT_QUESTION_COUNT;
 let currentMode = "letters";
+let gameStartTime = 0;
+let elapsedGameTime = 0;
+let timerLoopId = null;
 
 let cameraStream = null;
 let handLandmarker = null;
@@ -124,8 +129,10 @@ function beginGame() {
   correctAnswers = 0;
   wrongAnswers = 0;
   elements.scoreValue.textContent = "0";
+  resetGameTimer();
   setTeacherState("normal");
   setScreen("game");
+  startGameTimer();
   showQuestion();
   void startCamera();
 }
@@ -263,10 +270,12 @@ function setResultTeacherState(state, message) {
 function showResult() {
   acceptingAnswer = false;
   clearGestureSelection();
+  stopGameTimer();
   stopCamera();
   elements.finalScore.textContent = String(score);
   elements.correctCount.textContent = String(correctAnswers);
   elements.wrongCount.textContent = String(wrongAnswers);
+  elements.finalTime.textContent = formatGameTime(elapsedGameTime);
 
   if (score >= 9) {
     elements.resultTitle.textContent = "ยอดเยี่ยมมาก!";
@@ -349,9 +358,52 @@ function escapeXml(value) {
 function goHome() {
   acceptingAnswer = false;
   clearGestureSelection();
+  stopGameTimer();
   stopCamera();
   setTeacherState("normal");
   setScreen("start");
+}
+
+function resetGameTimer() {
+  gameStartTime = 0;
+  elapsedGameTime = 0;
+  if (timerLoopId) cancelAnimationFrame(timerLoopId);
+  timerLoopId = null;
+  updateTimerDisplay(0);
+}
+
+function startGameTimer() {
+  gameStartTime = performance.now();
+  elapsedGameTime = 0;
+  updateTimerDisplay(0);
+  timerLoopId = requestAnimationFrame(updateGameTimer);
+}
+
+function updateGameTimer(now) {
+  if (!gameStartTime) return;
+  elapsedGameTime = Math.max(0, now - gameStartTime);
+  updateTimerDisplay(elapsedGameTime);
+  timerLoopId = requestAnimationFrame(updateGameTimer);
+}
+
+function stopGameTimer() {
+  if (timerLoopId) cancelAnimationFrame(timerLoopId);
+  timerLoopId = null;
+  if (gameStartTime) {
+    elapsedGameTime = Math.max(0, performance.now() - gameStartTime);
+    updateTimerDisplay(elapsedGameTime);
+  }
+}
+
+function updateTimerDisplay(milliseconds) {
+  elements.timerValue.textContent = formatGameTime(milliseconds);
+}
+
+function formatGameTime(milliseconds) {
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
 function playTone(frequency, duration, wave) {
@@ -628,5 +680,6 @@ window.addEventListener("resize", () => {
   if (cameraStream) resizeCameraCanvas();
 });
 window.addEventListener("beforeunload", stopCameraTracks);
+window.addEventListener("beforeunload", stopGameTimer);
 
 syncModeUi();

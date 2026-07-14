@@ -266,13 +266,26 @@ h1 span {
   text-underline-offset: 4px;
 }
 
+.secondary-button {
+  border: 3px solid rgba(31, 138, 112, 0.28);
+  border-radius: 18px;
+  padding: 13px 22px;
+  color: var(--green-dark);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 7px 18px rgba(31, 105, 88, 0.12);
+  cursor: pointer;
+  font-weight: 900;
+}
+
 .teacher-hero {
   position: relative;
   width: clamp(280px, 34vw, 470px);
-  min-height: 560px;
+  min-height: 610px;
   display: flex;
+  flex-direction: column;
   align-items: flex-end;
   justify-content: center;
+  gap: 12px;
 }
 
 .teacher-hero::before {
@@ -285,13 +298,13 @@ h1 span {
 }
 
 .teacher-hero-bubble {
-  position: absolute;
-  top: 8%;
-  left: 8%;
+  position: relative;
+  align-self: flex-start;
   z-index: 2;
-  max-width: 240px;
-  padding: 16px 18px;
-  border-radius: 26px;
+  max-width: 360px;
+  margin-left: -26px;
+  padding: 13px 18px;
+  border-radius: 24px;
   color: var(--green-dark);
   background: rgba(255, 250, 240, 0.95);
   box-shadow: 0 14px 30px rgba(26, 90, 74, 0.16);
@@ -300,8 +313,8 @@ h1 span {
 .teacher-hero-bubble::after {
   content: "";
   position: absolute;
-  bottom: -10px;
-  left: 34px;
+  bottom: -9px;
+  left: 42px;
   width: 22px;
   height: 22px;
   border-radius: 6px;
@@ -311,14 +324,14 @@ h1 span {
 
 .teacher-hero-bubble strong {
   display: block;
-  margin-bottom: 6px;
-  font-size: 1.18rem;
+  margin-bottom: 4px;
+  font-size: 1.08rem;
 }
 
 .teacher-hero-bubble p {
   margin: 0;
   color: #5d706c;
-  font-size: 0.92rem;
+  font-size: 0.86rem;
   font-weight: 700;
   line-height: 1.45;
 }
@@ -326,15 +339,12 @@ h1 span {
 .start-teacher-image {
   position: relative;
   z-index: 1;
-  width: min(100%, 360px);
-  object-fit: cover;
+  width: min(100%, 370px);
+  max-height: 480px;
+  object-fit: contain;
+  object-position: center bottom;
   filter: drop-shadow(0 20px 24px rgba(24, 86, 72, 0.18));
-  -webkit-mask-image:
-    radial-gradient(ellipse 66% 80% at 50% 44%, #000 0 62%, rgba(0, 0, 0, 0.9) 74%, rgba(0, 0, 0, 0.35) 86%, transparent 98%),
-    linear-gradient(to bottom, transparent 0%, #000 10%, #000 84%, transparent 100%);
-  mask-image:
-    radial-gradient(ellipse 66% 80% at 50% 44%, #000 0 62%, rgba(0, 0, 0, 0.9) 74%, rgba(0, 0, 0, 0.35) 86%, transparent 98%),
-    linear-gradient(to bottom, transparent 0%, #000 10%, #000 84%, transparent 100%);
+  border-radius: 30px;
 }
 
 .floating-letter {
@@ -402,6 +412,7 @@ h1 span {
   display: flex;
   justify-content: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .status-pill {
@@ -425,6 +436,7 @@ h1 span {
 
 .score-pill strong { color: #dc7521; }
 .progress-pill strong { color: #2784bc; }
+.time-pill strong { color: #1f8a70; font-variant-numeric: tabular-nums; }
 
 .icon-button {
   position: relative;
@@ -593,8 +605,11 @@ h1 span {
 }
 
 .game-teacher-image {
-  width: min(138px, 100%);
+  width: min(148px, 100%);
+  aspect-ratio: 2 / 3;
   object-fit: contain;
+  object-position: center top;
+  border-radius: 22px;
   filter: drop-shadow(0 12px 16px rgba(24, 86, 72, 0.16));
 }
 
@@ -637,14 +652,9 @@ h1 span {
 
 .teacher-image {
   width: min(100%, 240px);
-  object-fit: cover;
+  object-fit: contain;
   filter: drop-shadow(0 14px 18px rgba(24, 86, 72, 0.18));
-  -webkit-mask-image:
-    radial-gradient(ellipse 66% 80% at 50% 44%, #000 0 62%, rgba(0, 0, 0, 0.9) 74%, rgba(0, 0, 0, 0.35) 86%, transparent 98%),
-    linear-gradient(to bottom, transparent 0%, #000 10%, #000 84%, transparent 100%);
-  mask-image:
-    radial-gradient(ellipse 66% 80% at 50% 44%, #000 0 62%, rgba(0, 0, 0, 0.9) 74%, rgba(0, 0, 0, 0.35) 86%, transparent 98%),
-    linear-gradient(to bottom, transparent 0%, #000 10%, #000 84%, transparent 100%);
+  border-radius: 26px;
 }
 
 .answer-area {
@@ -886,35 +896,35 @@ h1 span {
 }
 
 .result-card {
-  width: min(480px, 100%);
-  padding: 38px;
-  border-radius: 42px;
+  width: min(520px, 100%);
+  max-height: calc(100svh - 44px);
+  padding: 24px 30px 26px;
+  border-radius: 34px;
   text-align: center;
+  overflow: hidden;
 }
 
 .result-teacher-image {
   display: block;
-  width: min(100%, 220px);
-  margin: 0 auto 8px;
-  object-fit: cover;
+  width: min(100%, 150px);
+  max-height: 178px;
+  margin: 0 auto 4px;
+  object-fit: contain;
+  object-position: center top;
   filter: drop-shadow(0 14px 18px rgba(24, 86, 72, 0.16));
-  -webkit-mask-image:
-    radial-gradient(ellipse 66% 80% at 50% 44%, #000 0 62%, rgba(0, 0, 0, 0.9) 74%, rgba(0, 0, 0, 0.35) 86%, transparent 98%),
-    linear-gradient(to bottom, transparent 0%, #000 10%, #000 84%, transparent 100%);
-  mask-image:
-    radial-gradient(ellipse 66% 80% at 50% 44%, #000 0 62%, rgba(0, 0, 0, 0.9) 74%, rgba(0, 0, 0, 0.35) 86%, transparent 98%),
-    linear-gradient(to bottom, transparent 0%, #000 10%, #000 84%, transparent 100%);
+  border-radius: 26px;
 }
 
 .result-medal {
-  font-size: 5rem;
+  font-size: 3.15rem;
   animation: hero-float 2.5s ease-in-out infinite;
 }
 
 .result-card h2 {
-  margin: 14px 0 0;
+  margin: 6px 0 0;
   color: var(--green-dark);
-  font-size: clamp(2.4rem, 7vw, 4rem);
+  font-size: clamp(2rem, 5.6vw, 3.2rem);
+  line-height: 1.05;
 }
 
 .result-card > p {
@@ -924,40 +934,65 @@ h1 span {
 }
 
 .result-teacher-message {
-  margin: 6px 0 2px;
+  margin: 4px 0 0;
   color: var(--green-dark);
   font-size: 1rem;
   font-weight: 800;
 }
 
 .final-score {
-  margin: 8px 0 18px;
+  margin: 2px 0 12px;
   color: var(--coral);
-  font-size: 6rem;
+  font-size: clamp(4rem, 9vw, 5.2rem);
   font-weight: 900;
   line-height: 1;
 }
 
 .summary-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin: 0 auto 26px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin: 0 auto 16px;
 }
 
 .summary-row > div {
   display: flex;
   flex-direction: column;
-  padding: 13px;
-  border-radius: 18px;
+  padding: 10px 6px;
+  border-radius: 16px;
   background: white;
   box-shadow: 0 7px 18px rgba(28, 97, 80, 0.1);
 }
 
-.summary-row strong { font-size: 1.6rem; }
+.summary-row strong {
+  color: var(--green-dark);
+  font-size: 1.45rem;
+  line-height: 1.1;
+}
+
+.summary-row span {
+  color: #647b76;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.summary-row strong { font-size: 1.25rem; }
 .summary-row div:first-child strong { color: #19955d; }
-.summary-row div:last-child strong { color: #df5b52; }
+.summary-row div:nth-child(2) strong { color: #df5b52; }
+.summary-row div:nth-child(3) strong { color: #2784bc; }
 .summary-row span { color: #6a7b77; font-size: 0.8rem; font-weight: 700; }
+
+.result-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.result-actions .big-button {
+  min-width: 190px;
+}
 
 .how-dialog {
   width: min(520px, calc(100% - 30px));
@@ -993,13 +1028,16 @@ h1 span {
 .dialog-close { position: absolute; top: 14px; right: 16px; border: 0; background: transparent; cursor: pointer; font-size: 2rem; }
 
 @media (max-width: 920px) {
-  .teacher-hero { min-height: 420px; }
-  .teacher-hero-bubble {
-    top: 4%;
-    left: 4%;
-    max-width: 220px;
+  .teacher-hero {
+    min-height: 500px;
+    gap: 10px;
   }
-  .start-teacher-image { width: min(100%, 310px); }
+  .teacher-hero-bubble {
+    max-width: 300px;
+    margin-left: 0;
+    padding: 11px 14px;
+  }
+  .start-teacher-image { width: min(100%, 310px); max-height: 390px; }
   .start-screen { justify-content: center; }
   .game-content { align-items: start; }
   .top-stage {
@@ -1012,7 +1050,7 @@ h1 span {
     right: 12px;
     width: min(188px, 24vw);
   }
-  .game-teacher-image { width: min(118px, 100%); }
+  .game-teacher-image { width: min(126px, 100%); }
   .answer-area {
     bottom: 52px;
     width: min(820px, calc(100vw - 24px));
@@ -1022,34 +1060,111 @@ h1 span {
 }
 
 @media (max-width: 680px) {
-  .screen { padding: 14px; }
-  .hero-card { padding: 28px 20px; border-radius: 30px; }
+  .screen { padding: 12px; }
+  .start-screen {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 12px;
+    overflow-y: auto;
+  }
+  .hero-card {
+    width: min(100%, 430px);
+    margin: 0 auto;
+    padding: 20px 16px;
+    border-radius: 28px;
+  }
+  .eyebrow { padding: 6px 12px; font-size: 0.78rem; }
+  .title-emblem { margin-top: 10px; font-size: 0.9rem; }
+  h1 { font-size: clamp(2.25rem, 15vw, 3.5rem); }
+  h1 span { margin-top: 6px; }
+  .subtitle { margin: 10px auto 14px; font-size: 0.9rem; }
+  .rules-grid { gap: 6px; margin-bottom: 12px; }
+  .rule-chip { padding: 8px 4px; border-radius: 14px; }
+  .rule-chip strong { font-size: 1.05rem; }
+  .rule-chip span { font-size: 0.68rem; }
+  .mode-picker,
+  .question-count-picker {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 18px;
+  }
+  .picker-label { margin-bottom: 8px; font-size: 0.82rem; }
+  .picker-options { gap: 7px; }
+  .mode-option,
+  .count-option {
+    padding: 9px 6px;
+    border-width: 2px;
+    border-radius: 13px;
+    font-size: 0.82rem;
+  }
+  .big-button { min-width: min(100%, 220px); font-size: 1rem; }
+  .text-button { margin-top: 10px; }
   .teacher-hero {
-    min-height: 300px;
-    width: min(100%, 320px);
+    width: min(100%, 430px);
+    min-height: 240px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 28px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    justify-content: stretch;
+    gap: 8px;
   }
   .teacher-hero-bubble {
-    max-width: 180px;
-    padding: 12px 14px;
+    align-self: start;
+    max-width: 190px;
+    margin: 12px 0 0 12px;
+    padding: 10px 12px;
   }
   .teacher-hero-bubble strong { font-size: 1rem; }
   .teacher-hero-bubble p { font-size: 0.78rem; }
-  .start-teacher-image { width: min(100%, 220px); }
+  .start-teacher-image {
+    width: min(100%, 178px);
+    max-height: 238px;
+    margin-left: auto;
+    border-radius: 22px;
+  }
+  .floating-letter { width: 52px; border-width: 3px; border-radius: 16px; font-size: 1.45rem; }
+  .letter-a { top: auto; bottom: 14px; left: 12px; }
+  .letter-b { right: 20%; top: 16px; }
+  .letter-c { bottom: 18px; left: 36%; }
   .picker-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .game-screen {
     padding: 10px 10px 70px;
   }
-  .game-header { grid-template-columns: 1fr auto; }
-  .game-header { padding-left: 50px; }
+  .game-header {
+    grid-template-columns: 1fr;
+    padding-left: 48px;
+  }
   .brand-mini { display: none; }
-  .status-group { justify-content: flex-start; }
-  .status-pill { gap: 5px; min-height: 45px; padding: 7px 11px; font-size: 0.78rem; }
-  .status-pill strong { font-size: 1.1rem; }
+  .status-group {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-content: stretch;
+    width: 100%;
+    gap: 5px;
+  }
+  .status-pill {
+    justify-content: center;
+    gap: 4px;
+    min-height: 42px;
+    padding: 6px 5px;
+    font-size: 0.72rem;
+  }
+  .status-pill > span:not(:first-child) { display: none; }
+  .status-pill strong { min-width: 0; font-size: 0.98rem; }
   .icon-button { width: 42px; height: 42px; font-size: 1.35rem; }
   .icon-button { left: 0; top: 0; }
   .game-content { margin-top: 8px; }
+  .top-stage {
+    width: 100%;
+    justify-items: center;
+  }
   .question-panel {
     width: min(100%, 360px);
+    min-width: min(100%, 320px);
     padding: 10px 12px 12px;
     border-radius: 20px;
   }
@@ -1070,8 +1185,18 @@ h1 span {
   .game-teacher-guide .teacher-bubble {
     display: none;
   }
-  .game-teacher-image { width: min(92px, 100%); }
-  .result-teacher-image { width: min(100%, 170px); }
+  .game-teacher-image { width: min(98px, 100%); }
+  .result-card { padding: 22px 16px; border-radius: 30px; }
+  .result-teacher-image { width: min(100%, 150px); max-height: 190px; }
+  .result-medal { font-size: 3.4rem; }
+  .final-score { font-size: 4.3rem; margin-bottom: 12px; }
+  .summary-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin-bottom: 18px; }
+  .summary-row > div { padding: 9px 4px; border-radius: 14px; }
+  .summary-row strong { font-size: 1rem; }
+  .summary-row span { font-size: 0.65rem; }
+  .result-actions { gap: 7px; }
+  .result-actions .big-button { min-width: 0; flex: 1.25; font-size: 0.98rem; }
+  .secondary-button { flex: 0.85; padding: 11px 10px; border-radius: 16px; font-size: 0.92rem; }
   .answer-area {
     bottom: 52px;
     width: calc(100vw - 14px);
